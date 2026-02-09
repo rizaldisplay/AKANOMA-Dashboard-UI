@@ -1,11 +1,13 @@
 'use client';
 import React, { useState, useMemo } from 'react';
+import Parameter from '@/components/parameter';
 import { 
   TrendingUp, 
   ShieldCheck, 
   Zap, 
   ArrowLeft, 
   Search, 
+  ChevronLeft, 
   ChevronRight, 
   Calendar,
   Activity,
@@ -151,6 +153,7 @@ interface AccountDetailProps {
 const AccountDetail: React.FC<AccountDetailProps> = ({ account, onBack }) => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-right duration-500">
+      <Parameter/>
       {/* Header Detail */}
       <div className="flex items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
@@ -264,6 +267,8 @@ interface LeaderboardProps {
 const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
   const [filter, setFilter] = useState<string>('All');
   const [search, setSearch] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Tentukan jumlah data per halaman
 
   const filteredTraders = useMemo(() => {
     return MOCK_TRADERS.filter(t => {
@@ -272,6 +277,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
       return matchesSearch && matchesFilter;
     });
   }, [search, filter]);
+
+  // Hitung data yang ditampilkan
+  const totalPages = Math.ceil(filteredTraders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = filteredTraders.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -302,55 +312,104 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
 
       {/* Table Header */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="hidden md:grid grid-cols-7 gap-4 p-4 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-          <div className="col-span-2">Trader / Strategi</div>
-          <div className="text-center">Risiko</div>
-          <div className="text-center">ROI %</div>
-          <div className="text-center">Drawdown</div>
-          <div className="text-center">Umur Akun</div>
-          <div className="text-right">Aksi</div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            {/* Table Header */}
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th className="p-4 pl-6">Akun User</th>
+                <th className="p-4 text-center">Risiko</th>
+                <th className="p-4 text-center">ROI %</th>
+                <th className="p-4 text-center">Drawdown</th>
+                <th className="p-4 text-center">Umur Akun</th>
+                <th className="p-4 pr-6 text-right">Aksi</th>
+              </tr>
+            </thead>
+
+            {/* Table Body */}
+            <tbody className="divide-y divide-slate-100">
+              {currentData.map((trader) => (
+                <tr 
+                  key={trader.id} 
+                  className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                  onClick={() => onSelectAccount(trader)}
+                >
+                  <td className="p-4 pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
+                        {trader.name[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{trader.name}</h4>
+                        <p className="text-xs text-slate-400">{trader.strategy}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4 text-center">
+                    <Badge variant={trader.risk}>{trader.risk}</Badge>
+                  </td>
+                  <td className="p-4 text-center">
+                    <span className="font-bold text-green-600">+{trader.roi}%</span>
+                  </td>
+                  <td className="p-4 text-center text-slate-700 font-bold">
+                    {trader.drawdown}%
+                  </td>
+                  <td className="p-4 text-center text-sm text-slate-500">
+                    {trader.age}
+                  </td>
+                  <td className="p-4 pr-6 text-right">
+                    <button className="text-blue-600 font-bold text-sm flex items-center gap-1 ml-auto group-hover:translate-x-1 transition-transform">
+                      Detail <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* List Items */}
-        <div className="divide-y divide-slate-100">
-          {filteredTraders.map((trader) => (
-            <div 
-              key={trader.id} 
-              className="grid grid-cols-1 md:grid-cols-7 gap-4 p-4 md:items-center hover:bg-slate-50/50 transition-colors cursor-pointer group"
-              onClick={() => onSelectAccount(trader)}
+        {/* Pagination Footer */}
+        <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
+          <div className="text-sm text-slate-500">
+            Showing <span className="font-medium text-slate-800">{startIndex + 1}</span> to <span className="font-medium text-slate-800">{Math.min(startIndex + itemsPerPage, filteredTraders.length)}</span> of <span className="font-medium text-slate-800">{filteredTraders.length}</span> results
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Prev Button */}
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <div className="col-span-2 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-                  {trader.name[0]}
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{trader.name}</h4>
-                  <p className="text-xs text-slate-400">{trader.strategy}</p>
-                </div>
-              </div>
-              <div className="text-center flex md:block items-center justify-between">
-                <span className="md:hidden text-xs text-slate-400 uppercase font-bold">Risk</span>
-                <Badge variant={trader.risk}>{trader.risk}</Badge>
-              </div>
-              <div className="text-center flex md:block items-center justify-between">
-                <span className="md:hidden text-xs text-slate-400 uppercase font-bold">ROI</span>
-                <span className="font-bold text-green-600">+{trader.roi}%</span>
-              </div>
-              <div className="text-center flex md:block items-center justify-between">
-                <span className="md:hidden text-xs text-slate-400 uppercase font-bold">Drawdown</span>
-                <span className="font-bold text-slate-700">{trader.drawdown}%</span>
-              </div>
-              <div className="text-center flex md:block items-center justify-between">
-                <span className="md:hidden text-xs text-slate-400 uppercase font-bold">Age</span>
-                <span className="text-sm text-slate-500">{trader.age}</span>
-              </div>
-              <div className="text-right">
-                <button className="text-blue-600 font-bold text-sm flex items-center gap-1 ml-auto group-hover:translate-x-1 transition-transform">
-                  Detail <ChevronRight className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === index + 1 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {index + 1}
                 </button>
-              </div>
+              ))}
             </div>
-          ))}
+
+            {/* Next Button */}
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
