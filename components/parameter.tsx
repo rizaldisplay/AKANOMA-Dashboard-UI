@@ -28,7 +28,14 @@ export default function ForexDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const StatCard = ({ title, value, icon, positive }) => (
+  interface StatCardProps {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    positive: boolean;
+  }
+
+  const StatCard = ({ title, value, icon, positive }: StatCardProps) => (
     <Card className="rounded-2xl shadow-md">
       <CardContent className="p-6 flex items-center justify-between">
         <div>

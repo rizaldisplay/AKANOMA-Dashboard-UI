@@ -222,7 +222,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ account, onBack }) => {
                 <YAxis hide domain={['auto', 'auto']} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, '']}
+                  formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, '']}
                 />
                 <Area type="monotone" dataKey="equity" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorEquity)" />
                 <Line type="monotone" dataKey="balance" stroke="#94a3b8" strokeDasharray="5 5" dot={false} />
