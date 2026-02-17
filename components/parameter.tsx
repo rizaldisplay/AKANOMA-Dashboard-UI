@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUpRight, ArrowDownRight, Wallet, TrendingUp, ShieldCheck } from "lucide-react";
+import socketio from 'socket.io-client';
 
 // MOCK realtime websocket simulation
 export default function ForexDashboard() {
@@ -11,22 +12,58 @@ export default function ForexDashboard() {
     profit: 0,
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData((prev) => {
-        const profitChange = (Math.random() - 0.45) * 50;
-        const newProfit = prev.profit + profitChange;
-        return {
-          balance: prev.balance,
-          equity: prev.balance + newProfit,
-          margin: prev.margin,
-          profit: newProfit,
-        };
-      });
-    }, 1500);
+  const socket = socketio('http://103.103.20.124:5000')
 
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setData((prev) => {
+  //       const profitChange = (Math.random() - 0.45) * 50;
+  //       const newProfit = prev.profit + profitChange;
+  //       return {
+  //         balance: prev.balance,
+  //         equity: prev.balance + newProfit,
+  //         margin: prev.margin,
+  //         profit: newProfit,
+  //       };
+  //     });
+  //   }, 1500);
+
+  //   return () => clearInterval(interval);
+  // }, []);
+  
+  useEffect(() => {
+      if (!socket) return;
+
+      const handleConnect = () => {
+          console.log(`Connected to server`);
+          // Bergabung ke room 'GRAFIK' segera setelah connect
+          socket.emit('monitorTrader', 'GRAFIK');
+      };
+
+      const handleUpdateData = (payload: { balance: number; equity: number; margin: number; profit: number; acc_id?: string }) => {
+          console.log("Data diterima:", payload);
+          // Update state Arslan dengan data dari backend
+          setData((prev) => ({
+              ...prev,
+              balance: payload.balance,
+              equity: payload.equity,
+              margin: payload.margin,
+              profit: payload.profit,
+              acc_id: payload.acc_id // Jika ingin menyimpan ID akun juga
+          }));
+      };
+
+      socket.on('connect', handleConnect);
+      socket.on('update_data', handleUpdateData); // Pastikan nama event sama dengan backend
+      socket.on('disconnect', () => console.log('Disconnected'));
+
+      // Cleanup
+      return () => {
+          socket.off('connect', handleConnect);
+          socket.off('update_data', handleUpdateData); // Harus konsisten dengan handleUpdateData
+          socket.off('disconnect');
+      };
+  }, [socket]);
 
   interface StatCardProps {
     title: string;
