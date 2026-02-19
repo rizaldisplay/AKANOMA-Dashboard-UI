@@ -36,7 +36,6 @@ interface Trader {
   id: number;
   name: string;
   strategy: string;
-  risk: 'High' | 'Medium' | 'Low';
   roi: number;
   drawdown: number;
   age: string;
@@ -59,7 +58,6 @@ const MOCK_TRADERS: Trader[] = [
     id: 1,
     name: "Alpha Scalper Pro",
     strategy: "Scalping",
-    risk: "High",
     roi: 45.2,
     drawdown: 12.4,
     age: "320 Hari",
@@ -77,7 +75,6 @@ const MOCK_TRADERS: Trader[] = [
     id: 2,
     name: "Blue Chip Conservative",
     strategy: "Conservative",
-    risk: "Low",
     roi: 8.5,
     drawdown: 3.2,
     age: "1.5 Tahun",
@@ -95,7 +92,6 @@ const MOCK_TRADERS: Trader[] = [
     id: 3,
     name: "Steady Flow Swing",
     strategy: "Moderate",
-    risk: "Medium",
     roi: 15.1,
     drawdown: 7.5,
     age: "210 Hari",
@@ -122,7 +118,7 @@ const MONTHLY_DATA: MonthlyData[] = [
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant: Trader['risk'] | 'Default';
+  variant: 'Default';
 }
 
 const Badge: React.FC<BadgeProps> = ({ children, variant }) => {
@@ -166,7 +162,7 @@ const AccountDetail: React.FC<AccountDetailProps> = ({ account, onBack }) => {
           <div>
             <h2 className="text-2xl font-bold text-slate-800">{account.name}</h2>
             <div className="flex gap-2 mt-1">
-              <Badge variant={account.risk}>{account.risk} Risk</Badge>
+              {/* <Badge variant={account.risk}>{account.risk} Risk</Badge> */}
               <span className="text-sm text-slate-400 flex items-center gap-1">
                 <Calendar className="w-4 h-4" /> Terdaftar: {account.age}
               </span>
@@ -318,7 +314,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
                 <th className="p-4 pl-6">Akun User</th>
-                <th className="p-4 text-center">Risiko</th>
                 <th className="p-4 text-center">ROI %</th>
                 <th className="p-4 text-center">Drawdown</th>
                 <th className="p-4 text-center">Umur Akun</th>
@@ -344,9 +339,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
                         <p className="text-xs text-slate-400">{trader.strategy}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="p-4 text-center">
-                    <Badge variant={trader.risk}>{trader.risk}</Badge>
                   </td>
                   <td className="p-4 text-center">
                     <span className="font-bold text-green-600">+{trader.roi}%</span>
@@ -429,15 +421,15 @@ export default function App() {
         {/* Navbar */}
         <header className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-gray-800 p-2 rounded-lg">
               {/* <Zap className="text-white w-6 h-6 fill-current" /> */}
             </div>
-            <h1 className="text-xl font-black tracking-tight text-slate-800 uppercase">Arslan<span className="text-blue-600">Invest</span></h1>
+            <h1 className="text-xl font-black tracking-tight text-slate-800 uppercase">AKANOMA<span className="text-red-600">EXCLUSIVE</span></h1>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-bold text-slate-800">Halo, Arslan!</span>
-              <span className="text-[10px] text-slate-400 bg-slate-100 px-2 rounded font-bold">INVESTOR TIER 1</span>
+              <span className="text-sm font-bold text-slate-800">Halo, Akanoma!</span>
+              <span className="text-[10px] text-slate-400 bg-slate-100 px-2 rounded font-bold">INVESTOR ADMIN</span>
             </div>
             <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arslan" alt="User Profile" />
@@ -464,7 +456,7 @@ export default function App() {
         </main>
 
         <footer className="mt-16 pt-8 border-t border-slate-200 text-center text-slate-400 text-sm">
-          <p>© 2024 ArslanInvest SaaS Platform. Past performance is not indicative of future results.</p>
+          <p>© 2024 Akanoma Exclusive Trader EA Profesioanal. Past performance is not indicative of future results.</p>
         </footer>
       </div>
     </div>

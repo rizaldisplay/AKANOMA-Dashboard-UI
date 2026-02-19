@@ -14,56 +14,56 @@ export default function ForexDashboard() {
 
   const socket = socketio('http://192.168.5.99:5000')
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setData((prev) => {
-  //       const profitChange = (Math.random() - 0.45) * 50;
-  //       const newProfit = prev.profit + profitChange;
-  //       return {
-  //         balance: prev.balance,
-  //         equity: prev.balance + newProfit,
-  //         margin: prev.margin,
-  //         profit: newProfit,
-  //       };
-  //     });
-  //   }, 1500);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-  
   useEffect(() => {
-      if (!socket) return;
+    const interval = setInterval(() => {
+      setData((prev) => {
+        const profitChange = (Math.random() - 0.45) * 50;
+        const newProfit = prev.profit + profitChange;
+        return {
+          balance: prev.balance,
+          equity: prev.balance + newProfit,
+          margin: prev.margin,
+          profit: newProfit,
+        };
+      });
+    }, 1500);
 
-      const handleConnect = () => {
-          console.log(`Connected to server`);
-          // Bergabung ke room 'GRAFIK' segera setelah connect
-          socket.emit('monitorTrader', 'GRAFIK');
-      };
+    return () => clearInterval(interval);
+  }, []);
+  
+  // useEffect(() => {
+  //     if (!socket) return;
 
-      const handleUpdateData = (payload: { bal: number; eq: number; mar: number; pl: number; acc_id?: string }) => {
-          console.log("Data diterima:", payload);
-          // Update state Arslan dengan data dari backend
-          setData((prev) => ({
-              ...prev,
-              balance: payload.bal,
-              equity: payload.eq,
-              margin: payload.mar,
-              profit: payload.pl,
-              acc_id: payload.acc_id // Jika ingin menyimpan ID akun juga
-          }));
-      };
+  //     const handleConnect = () => {
+  //         console.log(`Connected to server`);
+  //         // Bergabung ke room 'GRAFIK' segera setelah connect
+  //         socket.emit('monitorTrader', 'GRAFIK');
+  //     };
 
-      socket.on('connect', handleConnect);
-      socket.on('update_data', handleUpdateData); // Pastikan nama event sama dengan backend
-      socket.on('disconnect', () => console.log('Disconnected'));
+  //     const handleUpdateData = (payload: { bal: number; eq: number; mar: number; pl: number; acc_id?: string }) => {
+  //         console.log("Data diterima:", payload);
+  //         // Update state Arslan dengan data dari backend
+  //         setData((prev) => ({
+  //             ...prev,
+  //             balance: payload.bal,
+  //             equity: payload.eq,
+  //             margin: payload.mar,
+  //             profit: payload.pl,
+  //             acc_id: payload.acc_id // Jika ingin menyimpan ID akun juga
+  //         }));
+  //     };
 
-      // Cleanup
-      return () => {
-          socket.off('connect', handleConnect);
-          socket.off('update_data', handleUpdateData); // Harus konsisten dengan handleUpdateData
-          socket.off('disconnect');
-      };
-  }, [socket]);
+  //     socket.on('connect', handleConnect);
+  //     socket.on('update_data', handleUpdateData); // Pastikan nama event sama dengan backend
+  //     socket.on('disconnect', () => console.log('Disconnected'));
+
+  //     // Cleanup
+  //     return () => {
+  //         socket.off('connect', handleConnect);
+  //         socket.off('update_data', handleUpdateData); // Harus konsisten dengan handleUpdateData
+  //         socket.off('disconnect');
+  //     };
+  // }, [socket]);
 
   interface StatCardProps {
     title: string;
