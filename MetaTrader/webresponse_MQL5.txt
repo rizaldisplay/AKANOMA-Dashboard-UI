@@ -1,0 +1,106 @@
+//+------------------------------------------------------------------+
+//|                                         Akanoma_Pusher.mq5 |
+//|                                  Copyright 2026, Akanoma    |
+//|                                  https://www.akanomaexc.com    |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2026, Akanoma Exclusive"
+#property link      "https://www.akanomaexc.com/"
+#property version   "1.00"
+#property strict
+
+// --- INPUT PARAMETERS
+input string   InpApiUrl = "http://192.168.5.99:5000/api/update-stats"; // URL API Express JS
+input string   InpApiKey = "SECRET_KEY_KAMU"; // API Key untuk keamanan
+input int      InpInterval = 3; // Kirim data setiap X detik
+
+// --- GLOBAL VARIABLES
+datetime last_send_time = 0;
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Set timer sesuai input interval
+   EventSetTimer(InpInterval);
+   
+   // Kirim data pertama kali saat EA dijalankan
+   SendData();
+   
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   EventKillTimer();
+}
+
+//+------------------------------------------------------------------+
+//| Timer function                                                   |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+   SendData();
+}
+
+//+------------------------------------------------------------------+
+//| Trade function - Update instan saat ada transaksi tutup/buka     |
+//+------------------------------------------------------------------+
+void OnTrade()
+{
+   SendData();
+}
+
+//+------------------------------------------------------------------+
+//| Fungsi Utama Mengirim Data                                       |
+//+------------------------------------------------------------------+
+void SendData()
+{
+   // Cegah spamming (maksimal kirim sekali tiap 2 detik meski ada trade beruntun)
+   if(TimeCurrent() - last_send_time < 2) return;
+
+   char post[], result[];
+   string result_headers;
+   string headers = "Content-Type: application/json\r\n";
+   headers += "x-api-key: " + InpApiKey + "\r\n";
+
+   // Mengambil data akun
+   long login = AccountInfoInteger(ACCOUNT_LOGIN);
+   double balance = AccountInfoDouble(ACCOUNT_BALANCE);
+   double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+   double profit = AccountInfoDouble(ACCOUNT_PROFIT);
+   double margin = AccountInfoDouble(ACCOUNT_MARGIN);
+   string currency = AccountInfoString(ACCOUNT_CURRENCY);
+
+   // Construct JSON string (Sederhana agar ringan)
+   string json = StringFormat(
+      "{\"acc_id\":\"%d\",\"data\":{\"bal\":%.2f,\"eq\":%.2f,\"pl\":%.2f,\"mar\":%.2f,\"cur\":\"%s\"}}",
+      login, balance, equity, profit, margin, currency
+   );
+
+   // Konversi string ke char array untuk WebRequest
+   StringToCharArray(json, post, 0, WHOLE_ARRAY, CP_UTF8);
+   ArrayResize(post, ArraySize(post)-1); // Hapus null terminator
+
+   // Kirim Data (Timeout 3000ms agar tidak menggantung)
+   int res = WebRequest("POST", InpApiUrl, headers, 3000, post, result, result_headers);
+
+   if(res == -1)
+   {
+      Print("Error WebRequest: ", _LastError);
+      // Jika error 4060, artinya URL belum dimasukkan ke daftar 'Allowed URLs'
+      if(_LastError == 4060) Print("Tambahkan URL di: Tools -> Options -> Expert Advisors -> Allow WebRequest");
+   }
+   else
+   {
+      if(res == 200) {
+         // Sukses
+         last_send_time = TimeCurrent();
+      } else {
+         Print("Server merespon dengan kode: ", res);
+      }
+   }
+}

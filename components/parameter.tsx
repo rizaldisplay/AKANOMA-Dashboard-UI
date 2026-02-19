@@ -12,7 +12,7 @@ export default function ForexDashboard() {
     profit: 0,
   });
 
-  const socket = socketio('http://103.103.20.124:5000')
+  const socket = socketio('http://192.168.5.99:5000')
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -40,15 +40,15 @@ export default function ForexDashboard() {
           socket.emit('monitorTrader', 'GRAFIK');
       };
 
-      const handleUpdateData = (payload: { balance: number; equity: number; margin: number; profit: number; acc_id?: string }) => {
+      const handleUpdateData = (payload: { bal: number; eq: number; mar: number; pl: number; acc_id?: string }) => {
           console.log("Data diterima:", payload);
           // Update state Arslan dengan data dari backend
           setData((prev) => ({
               ...prev,
-              balance: payload.balance,
-              equity: payload.equity,
-              margin: payload.margin,
-              profit: payload.profit,
+              balance: payload.bal,
+              equity: payload.eq,
+              margin: payload.mar,
+              profit: payload.pl,
               acc_id: payload.acc_id // Jika ingin menyimpan ID akun juga
           }));
       };
@@ -77,7 +77,9 @@ export default function ForexDashboard() {
       <CardContent className="p-6 flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold">${value.toFixed(2)}</p>
+          <p className="text-2xl font-bold">
+            ${value !== undefined ? value.toFixed(2) : "0.00"}
+          </p>
         </div>
         <div className={`p-3 rounded-xl ${positive ? "bg-green-100" : "bg-red-100"}`}>
           {icon}
