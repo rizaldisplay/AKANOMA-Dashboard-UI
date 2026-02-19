@@ -269,7 +269,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onSelectAccount }) => {
   const filteredTraders = useMemo(() => {
     return MOCK_TRADERS.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase());
-      const matchesFilter = filter === 'All' || t.strategy === filter || t.risk === filter;
+      const matchesFilter = filter === 'All' || t.strategy === filter;
       return matchesSearch && matchesFilter;
     });
   }, [search, filter]);
